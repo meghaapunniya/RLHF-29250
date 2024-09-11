@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Ninja Jump</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    #gameCanvas { background: #fff; border: 2px solid #000; }
+    .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close:hover, .close:focus { color: black; text-decoration: none; cursor: pointer; }
+    #sensitivitySlider { width: 80%; margin: 10px auto; display: block; }
+</style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <button id="startButton">Start Game</button>
+    <button id="howToPlay">How to Play</button>
+    <input type="range" min="1" max="100" value="50" class="slider" id="sensitivitySlider">
+</div>
+
+<div id="instructionsModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <p>Speak into your microphone to make the ninja jump. The longer you speak, the higher and further the ninja jumps. Double jump by speaking again mid-air.</p>
+        <!-- Add more instructions here -->
+    </div>
+</div>
+
+<script>
+// Game setup
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+let isGameRunning = false;
+let ninja = {x: 50, y: 300, dy: 0, jumping: false, voicePower: 0};
+let platforms = [];
+let spikes = [];
+let score = 0;
+let highScore = localStorage.getItem('highScore') || 0;
+
+// Audio setup
+let audioContext, analyser, microphone;
+
+function initializeAudio() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+}
+
+function getVoicePower() {
+    let dataArray = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(dataArray);
+    return dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+}
+
+// Game loop
+function gameLoop() {
+    if (!isGameRunning) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Update ninja position
+    if (ninja.voicePower > 0) {
+        ninja.dy = -2 - (ninja.voicePower / 50); // Adjust for sensitivity
+        ninja.jumping = true;
+    } else if (ninja.jumping) {
+        ninja.dy += 0.1; // Gravity effect
+    }
+    
+    ninja.y += ninja.dy;
+    
+    // Platform collision and drawing
+    // (This part needs more complex logic for platforms, spikes, scoring, etc.)
+
+    // Draw ninja
+    ctx.fillStyle = 'black';
+    ctx.fillRect(ninja.x, ninja.y, 20, 20);
+
+    // Voice power decay
+    ninja.voicePower *= 0.95; // Decay voice power
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Start game button
+document.getElementById('startButton').onclick = function() {
+    if (!isGameRunning) {
+        initializeAudio();
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                initializeAudio();
+                isGameRunning = true;
+                gameLoop();
+            }).catch(err => {
+                alert('Microphone access denied. Please allow microphone access to play.');
+            });
+    }
+};
+
+// How to play modal
+let modal = document.getElementById('instructionsModal');
+document.getElementById('howToPlay').onclick = () => modal.style.display = "block";
+document.getElementsByClassName("close")[0].onclick = () => modal.style.display = "none";
+
+// Sensitivity slider
+document.getElementById('sensitivitySlider').oninput = function() {
+    // Here you would adjust how the game interprets voice input based on slider value
+    console.log('Sensitivity:', this.value);
+};
+
+// Initial call to set up the game environment
+initializeAudio();
+</script>
+</body>
+</html>

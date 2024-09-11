@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voice Ninja Jump</title>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    #gameArea {
+        width: 100%;
+        height: 500px;
+        border: 1px solid black;
+        position: relative;
+        overflow: hidden;
+    }
+    #ninja {
+        width: 40px;
+        height: 40px;
+        background-color: black;
+        position: absolute;
+        bottom: 0;
+        left: 50px;
+    }
+    .platform, .spike {
+        position: absolute;
+        background-color: green;
+        width: 100px;
+        height: 20px;
+    }
+    .spike {
+        background-color: red;
+    }
+    #startButton, #howToPlay {
+        margin: 20px 0;
+    }
+    .modal-content {
+        background: #f4f4f4;
+    }
+</style>
+</head>
+<body>
+
+<div id="gameArea">
+    <div id="ninja"></div>
+</div>
+<button id="startButton" class="btn btn-primary">Start Game</button>
+<button id="howToPlay" class="btn btn-info" data-toggle="modal" data-target="#instructionsModal">How to Play</button>
+<div id="scoreDisplay" style="display: none;">
+    Score: <span id="score">0</span> | High Score: <span id="highScore">0</span>
+</div>
+
+<!-- Instructions Modal -->
+<div class="modal" id="instructionsModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">How to Play</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Speak or scream into your microphone to make the ninja jump. Longer sounds result in higher and longer jumps. Avoid spikes and don't fall off!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    const gameArea = document.getElementById('gameArea');
+    const ninja = document.getElementById('ninja');
+    let isJumping = false;
+    let gameRunning = false;
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') || 0;
+
+    // Microphone setup
+    let mediaStream;
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        mediaStream = stream;
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        microphone.connect(analyser);
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            analyser.getByteFrequencyData(dataArray);
+            const averageVolume = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
+
+            if (averageVolume > 50) {  // Adjust this threshold as needed
+                jump();
+            } else if (isJumping) {
+                fall();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.getElementById('startButton').onclick = function() {
+            gameRunning = true;
+            gameLoop();
+            this.style.display = 'none';
+            document.getElementById('scoreDisplay').style.display = 'block';
+        };
+    });
+
+    function jump() {
+        if (!isJumping) {
+            ninja.style.bottom = parseInt(ninja.style.bottom || 0) + 50 + 'px';
+            isJumping = true;
+            score++;
+            updateScore();
+        }
+    }
+
+    function fall() {
+        let position = parseInt(ninja.style.bottom || 0);
+        if (position > 0) {
+            ninja.style.bottom = (position - 5) + 'px';
+        } else {
+            endGame();
+        }
+    }
+
+    function updateScore() {
+        document.getElementById('score').textContent = score;
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('highScore', highScore);
+            document.getElementById('highScore').textContent = highScore;
+        }
+    }
+
+    function endGame() {
+        gameRunning = false;
+        alert('Game Over! Your score: ' + score);
+        score = 0;
+        updateScore();
+        ninja.style.bottom = '0px';
+        document.getElementById('startButton').style.display = 'inline-block';
+    }
+
+    // Place platforms and spikes randomly
+    function placeObstacles() {
+        for (let i = 0; i < 10; i++) {
+            let platform = document.createElement('div');
+            platform.className = 'platform';
+            platform.style.left = `${Math.random() * 80 + 10}%`;
+            platform.style.bottom = `${Math.random() * 400}px`;
+            gameArea.appendChild(platform);
+
+            // Add spikes less frequently
+            if (Math.random() < 0.3) {
+                let spike = document.createElement('div');
+                spike.className = 'spike';
+                spike.style.left = platform.style.left;
+                spike.style.bottom = `${parseInt(platform.style.bottom) + 20}px`;
+                gameArea.appendChild(spike);
+            }
+        }
+    }
+
+    placeObstacles();
+</script>
+</body>
+</html>
