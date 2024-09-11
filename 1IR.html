@@ -1,596 +1,560 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ninja Scream Jump</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        touch-action: manipulation;
-      }
 
-      #gameContainer {
-        width: 100%;
-        max-width: 800px;
-        height: 600px;
-        position: relative;
-        overflow: hidden;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ninja Scream Jump</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      touch-action: manipulation;
+    }
 
-      #gameCanvas {
-        width: 100%;
-        height: 100%;
-      }
+    #gameContainer {
+      width: 100%;
+      max-width: 800px;
+      height: 600px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
 
-      #startScreen,
-      #gameOverScreen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-      }
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+    }
 
-      #startButton,
-      #restartButton,
-      #howToPlayButton {
-        font-size: 24px;
-        padding: 15px 30px;
-        margin-top: 20px;
-        cursor: pointer;
-        background-color: #e94560;
-        color: white;
-        border: none;
-        border-radius: 50px;
-        transition: all 0.3s ease;
-      }
+    #startScreen,
+    #gameOverScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+    }
 
-      #startButton:hover,
-      #restartButton:hover,
-      #howToPlayButton:hover {
-        background-color: #ff6b6b;
-        transform: scale(1.05);
-      }
+    #startButton,
+    #restartButton,
+    #howToPlayButton {
+      font-size: 24px;
+      padding: 15px 30px;
+      margin-top: 20px;
+      cursor: pointer;
+      background-color: #e94560;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
 
-      #sensitivityContainer {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        font-size: 14px;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 10px;
-        border-radius: 5px;
-      }
+    #startButton:hover,
+    #restartButton:hover,
+    #howToPlayButton:hover {
+      background-color: #ff6b6b;
+      transform: scale(1.05);
+    }
 
-      #sensitivitySlider {
-        width: 100px;
-        margin-top: 5px;
-      }
+    #sensitivityContainer {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 14px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+    }
 
-      #howToPlayButton {
-        font-size: 16px;
-        padding: 10px 20px;
-        margin-top: 10px;
-      }
+    #sensitivitySlider {
+      width: 100px;
+      margin-top: 5px;
+    }
 
-      #score,
-      #highScore {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        color: white;
-        font-size: 18px;
-        background-color: rgba(0, 0, 0, 0.5);
-        padding: 5px 10px;
-        border-radius: 5px;
-      }
+    #howToPlayButton {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin-top: 10px;
+    }
 
-      #highScore {
-        top: 50px;
-      }
+    #score,
+    #highScore {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: white;
+      font-size: 18px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
 
-      h1 {
-        font-size: 48px;
-        margin-bottom: 20px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      }
+    #highScore {
+      top: 50px;
+    }
 
-      p {
-        font-size: 18px;
-        margin-bottom: 10px;
-      }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
 
-      #modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-      }
+    p {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
 
-      #modalContent {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 600px;
-        border-radius: 10px;
-      }
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
 
-      #closeModal {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-      }
+    #modalContent {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 10px;
+    }
 
-      #closeModal:hover,
-      #closeModal:focus {
-        color: #000;
-        text-decoration: none;
-        cursor: pointer;
-      }
-    </style>
-  </head>
+    #closeModal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-  <body>
-    <div id="gameContainer">
-      <canvas id="gameCanvas"></canvas>
-      <div id="startScreen">
-        <h1>Ninja Scream Jump</h1>
-        <p>Scream to move and jump!</p>
-        <button id="startButton">Start Game</button>
-      </div>
-      <div id="gameOverScreen" style="display: none">
-        <h1>Game Over</h1>
-        <p>Your Score: <span id="finalScore"></span></p>
-        <p>High Score: <span id="finalHighScore"></span></p>
-        <button id="restartButton">Play Again</button>
-      </div>
-      <div id="sensitivityContainer">
-        <label for="sensitivitySlider">Mic Sensitivity:</label>
-        <input
-          type="range"
-          id="sensitivitySlider"
-          min="1"
-          max="100"
-          value="50"
-        />
-        <button id="howToPlayButton">How to Play?</button>
-      </div>
-      <div id="score">Score: 0</div>
-      <div id="highScore">High Score: 0</div>
+    #closeModal:hover,
+    #closeModal:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="startScreen">
+      <h1>Ninja Scream Jump</h1>
+      <p>Scream to move and jump!</p>
+      <button id="startButton">Start Game</button>
     </div>
-
-    <div id="modal">
-      <div id="modalContent">
-        <span id="closeModal">&times;</span>
-        <h2>How to Play</h2>
-        <ul>
-          <li>Make loud noises (scream) to control the ninja.</li>
-          <li>The louder the voice, the higher the ninja jumps.</li>
-          <li>Avoid falling off the platforms or hitting spikes.</li>
-          <li>Reach the finish flag to complete the level.</li>
-          <li>Adjust the mic sensitivity using the slider if needed.</li>
-        </ul>
-      </div>
+    <div id="gameOverScreen" style="display: none;">
+      <h1>Game Over</h1>
+      <p>Your Score: <span id="finalScore"></span></p>
+      <p>High Score: <span id="finalHighScore"></span></p>
+      <button id="restartButton">Play Again</button>
     </div>
+    <div id="sensitivityContainer">
+      <label for="sensitivitySlider">Mic Sensitivity:</label>
+      <input type="range" id="sensitivitySlider" min="1" max="100" value="50">
+      <button id="howToPlayButton">How to Play?</button>
+    </div>
+    <div id="score">Score: 0</div>
+    <div id="highScore">High Score: 0</div>
+  </div>
 
-    <audio
-      id="gameOverSound"
-      src="https://assets.mixkit.co/active_storage/sfx/470/470-preview.mp3"
-    ></audio>
-    <audio
-      id="successSound"
-      src="https://assets.mixkit.co/active_storage/sfx/2016/2016-preview.mp3"
-    ></audio>
+  <div id="modal">
+    <div id="modalContent">
+      <span id="closeModal">&times;</span>
+      <h2>How to Play</h2>
+      <ul>
+        <li>Make loud noises (scream) to control the ninja.</li>
+        <li>The louder the voice, the higher the ninja jumps.</li>
+        <li>Avoid falling off the platforms or hitting spikes.</li>
+        <li>Reach the finish flag to complete the level.</li>
+        <li>Adjust the mic sensitivity using the slider if needed.</li>
+      </ul>
+    </div>
+  </div>
 
-    <script>
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
-      const startScreen = document.getElementById('startScreen');
-      const gameOverScreen = document.getElementById('gameOverScreen');
-      const startButton = document.getElementById('startButton');
-      const restartButton = document.getElementById('restartButton');
-      const sensitivitySlider = document.getElementById('sensitivitySlider');
-      const scoreElement = document.getElementById('score');
-      const highScoreElement = document.getElementById('highScore');
-      const finalScoreElement = document.getElementById('finalScore');
-      const finalHighScoreElement = document.getElementById('finalHighScore');
-      const howToPlayButton = document.getElementById('howToPlayButton');
-      const modal = document.getElementById('modal');
-      const closeModal = document.getElementById('closeModal');
-      const gameOverSound = document.getElementById('gameOverSound');
-      const successSound = document.getElementById('successSound');
+  <audio id="gameOverSound" src="https://assets.mixkit.co/active_storage/sfx/470/470-preview.mp3"></audio>
+  <audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2016/2016-preview.mp3"></audio>
 
-      let gameLoop;
-      let ninja;
-      let platforms = [];
-      let score = 0;
-      let highScore = localStorage.getItem('highScore') || 0;
-      let audioContext;
-      let microphone;
-      let analyser;
-      let screamVolume = 0;
-      let sensitivity = 50;
-      let cameraOffset = 0;
-      let finishFlag;
-      let canMove = false;
-      let gameOver = false;
-      let timeUnderPlatforms = 0;
-      const maxUnderPlatformTime = 1000; // 1 second in milliseconds
-      let underPlatformStartTime = null;
 
-      class Ninja {
-        constructor() {
-          this.width = 30;
-          this.height = 30;
-          this.x = 0;
-          this.y = 0;
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startScreen = document.getElementById('startScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const startButton = document.getElementById('startButton');
+    const restartButton = document.getElementById('restartButton');
+    const sensitivitySlider = document.getElementById('sensitivitySlider');
+    const scoreElement = document.getElementById('score');
+    const highScoreElement = document.getElementById('highScore');
+    const finalScoreElement = document.getElementById('finalScore');
+    const finalHighScoreElement = document.getElementById('finalHighScore');
+    const howToPlayButton = document.getElementById('howToPlayButton');
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('closeModal');
+    const gameOverSound = document.getElementById('gameOverSound');
+    const successSound = document.getElementById('successSound');
+
+    let gameLoop;
+    let ninja;
+    let platforms = [];
+    let score = 0;
+    let highScore = localStorage.getItem('highScore') || 0;
+    let audioContext;
+    let microphone;
+    let analyser;
+    let screamVolume = 0;
+    let sensitivity = 50;
+    let cameraOffset = 0;
+    let finishFlag;
+    let canMove = false;
+    let gameOver = false;
+    let timeUnderPlatforms = 0;
+    const maxUnderPlatformTime = 500; // milliseconds
+    let underPlatformStartTime = null;
+
+    class Ninja {
+      constructor() {
+        this.width = 30;
+        this.height = 30;
+        this.x = 0;
+        this.y = 0;
+        this.vy = 0;
+        this.vx = 3;
+        this.gravity = 0.5;
+        this.isJumping = false;
+        this.jumpPower = 0;
+      }
+
+      draw() {
+        ctx.fillStyle = '#e94560';
+        ctx.fillRect(this.x - cameraOffset, this.y, this.width, this.height);
+      }
+
+      update() {
+        this.vy += this.gravity;
+        this.y += this.vy;
+        this.x += this.vx;
+
+        // Ensure the ninja doesn't go below the ground
+        if (this.y + this.height > canvas.height) {
+          this.y = canvas.height - this.height;
           this.vy = 0;
-          this.vx = 3;
-          this.gravity = 0.5;
           this.isJumping = false;
-          this.jumpPower = 0;
         }
 
-        draw() {
-          ctx.fillStyle = '#e94560';
-          ctx.fillRect(this.x - cameraOffset, this.y, this.width, this.height);
+        // Limit how high the ninja can go (max height: 50px from the top of the canvas)
+        if (this.y < 50) {
+          this.y = 50;
+          this.vy = 0;
         }
 
-        update() {
-          this.vy += this.gravity;
-          this.y += this.vy;
-          this.x += this.vx;
-
-          // Ensure the ninja doesn't go below the ground
-          if (this.y + this.height > canvas.height) {
-            this.y = canvas.height - this.height;
-            this.vy = 0;
+        // Check scream volume and initiate jump
+        if (screamVolume > 219) {
+          this.jumpPower = Math.min(this.jumpPower + 0.5, 15);
+          this.vy = -this.jumpPower;
+          this.isJumping = true;
+        } else if (this.isJumping) {
+          this.jumpPower = Math.max(this.jumpPower - 0.2, 0);
+          if (this.jumpPower === 0) {
             this.isJumping = false;
           }
+        }
+      }
+    }
 
-          // Limit how high the ninja can go (max height: 50px from the top of the canvas)
-          if (this.y < 50) {
-            this.y = 50;
-            this.vy = 0;
-          }
+    class Platform {
+      constructor(x, y, width, height, hasSpikes = false) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.hasSpikes = hasSpikes;
+      }
 
-          // Check scream volume and initiate jump
-          if (screamVolume > 219) {
-            this.jumpPower = Math.min(this.jumpPower + 0.5, 15);
-            this.vy = -this.jumpPower;
-            this.isJumping = true;
-          } else if (this.isJumping) {
-            this.jumpPower = Math.max(this.jumpPower - 0.2, 0);
-            if (this.jumpPower === 0) {
-              this.isJumping = false;
-            }
-          }
+      draw() {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(this.x - cameraOffset, this.y, this.width, this.height);
+
+        if (this.hasSpikes) {
+          this.drawSpikes();
         }
       }
 
-      class Platform {
-        constructor(x, y, width, height, hasSpikes = false) {
-          this.x = x;
-          this.y = y;
-          this.width = width;
-          this.height = height;
-          this.hasSpikes = hasSpikes;
-        }
+      drawSpikes() {
+        ctx.fillStyle = 'green';
+        const spikeWidth = 10;
+        const spikeHeight = 20;
+        const numSpikes = Math.floor(this.width / (spikeWidth * 2));
 
-        draw() {
-          ctx.fillStyle = '#000000';
-          ctx.fillRect(this.x - cameraOffset, this.y, this.width, this.height);
+        for (let i = 0; i < numSpikes; i++) {
+          const spikeX = this.x + i * spikeWidth * 2 + spikeWidth / 2 - cameraOffset;
+          const spikeY = this.y - spikeHeight;
 
-          if (this.hasSpikes) {
-            this.drawSpikes();
-          }
-        }
-
-        drawSpikes() {
-          ctx.fillStyle = 'green';
-          const spikeWidth = 10;
-          const spikeHeight = 20;
-          const numSpikes = Math.floor(this.width / (spikeWidth * 2));
-
-          for (let i = 0; i < numSpikes; i++) {
-            const spikeX =
-              this.x + i * spikeWidth * 2 + spikeWidth / 2 - cameraOffset;
-            const spikeY = this.y - spikeHeight;
-
-            ctx.beginPath();
-            ctx.moveTo(spikeX, spikeY + spikeHeight);
-            ctx.lineTo(spikeX - spikeWidth / 2, spikeY);
-            ctx.lineTo(spikeX + spikeWidth / 2, spikeY);
-            ctx.closePath();
-            ctx.fill();
-          }
+          ctx.beginPath();
+          ctx.moveTo(spikeX, spikeY + spikeHeight);
+          ctx.lineTo(spikeX - spikeWidth / 2, spikeY);
+          ctx.lineTo(spikeX + spikeWidth / 2, spikeY);
+          ctx.closePath();
+          ctx.fill();
         }
       }
+    }
 
-      class FinishFlag {
-        constructor(x, y) {
-          this.x = x;
-          this.y = y;
-          this.width = 30;
-          this.height = 60;
-        }
-
-        draw() {
-          const flagEmoji = '🏁'; // Flag emoji
-          ctx.font = '48px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(
-            flagEmoji,
-            this.x - cameraOffset + this.width / 2,
-            this.y + this.height / 1.5
-          );
-        }
+    class FinishFlag {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 30;
+        this.height = 60;
       }
 
-      function init() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        platforms = [];
-        generateLevel();
-        ninja = new Ninja();
+      draw() {
+        const flagEmoji = '🏁'; // Flag emoji
+        ctx.font = '48px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(flagEmoji, this.x - cameraOffset + this.width / 2, this.y + this.height / 1.5);
+      }
+    }
 
-        if (platforms.length > 0) {
-          const firstPlatform = platforms[0];
-          ninja.x = firstPlatform.x + (firstPlatform.width - ninja.width) / 2;
-          ninja.y = firstPlatform.y - ninja.height;
-        }
+    function init() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      platforms = [];
+      generateLevel();
+      ninja = new Ninja();
 
-        score = 0;
-        cameraOffset = 0;
-        updateScore();
-        updateHighScore();
+      if (platforms.length > 0) {
+        const firstPlatform = platforms[0];
+        ninja.x = firstPlatform.x + (firstPlatform.width - ninja.width) / 2;
+        ninja.y = firstPlatform.y - ninja.height;
       }
 
-      function generateLevel() {
-        let platformX = 0;
-        const minPlatformHeight = 30;
-        const maxPlatformHeight = 200;
-        const minGap = 70;
-        const maxGap = 200;
-        const levelLength = canvas.width * 10;
+      score = 0;
+      cameraOffset = 0;
+      updateScore();
+      updateHighScore();
+    }
 
-        let isFirstPlatform = true;
+    function generateLevel() {
+      let platformX = 0;
+      const minPlatformHeight = 30;
+      const maxPlatformHeight = 200;
+      const minGap = 70;
+      const maxGap = 200;
+      const levelLength = canvas.width * 10;
 
-        while (platformX < levelLength) {
-          const platformWidth = Math.random() * 100 + 50;
-          const platformHeight =
-            Math.random() * (maxPlatformHeight - minPlatformHeight) +
-            minPlatformHeight;
-          const platformY = canvas.height - platformHeight - minGap;
+      let isFirstPlatform = true;
 
-          const hasSpikes = !isFirstPlatform && Math.random() < 0.3;
+      while (platformX < levelLength) {
+        const platformWidth = Math.random() * 100 + 50;
+        const platformHeight = Math.random() * (maxPlatformHeight - minPlatformHeight) + minPlatformHeight;
+        const platformY = canvas.height - platformHeight - minGap;
 
-          platforms.push(
-            new Platform(
-              platformX,
-              platformY,
-              platformWidth,
-              platformHeight,
-              hasSpikes
-            )
-          );
+        const hasSpikes = !isFirstPlatform && Math.random() < 0.3;
 
-          platformX +=
-            platformWidth + Math.random() * (maxGap - minGap) + minGap;
-          isFirstPlatform = false; // Ensure only the very first platform is spike-free
-        }
+        platforms.push(new Platform(platformX, platformY, platformWidth, platformHeight, hasSpikes));
 
-        finishFlag = new FinishFlag(levelLength, canvas.height - 100);
+        platformX += platformWidth + Math.random() * (maxGap - minGap) + minGap;
+        isFirstPlatform = false;  // Ensure only the very first platform is spike-free
       }
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        platforms.forEach((platform) => platform.draw());
-        finishFlag.draw();
-        ninja.draw();
-      }
+      finishFlag = new FinishFlag(levelLength, canvas.height - 100);
+    }
 
-      function update() {
-        if (gameOver) return; // Skip update if the game is over
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      platforms.forEach(platform => platform.draw());
+      finishFlag.draw();
+      ninja.draw();
+    }
 
-        // Set canMove based on scream volume and sensitivity
-        canMove = screamVolume > sensitivity;
+    function update() {
+      if (gameOver) return; // Skip update if the game is over
 
-        if (canMove) {
-          ninja.update();
-          cameraOffset = ninja.x - canvas.width / 4;
+      // Set canMove based on scream volume and sensitivity
+      canMove = screamVolume > sensitivity;
 
-          let isUnderPlatform = false;
+      if (canMove) {
+        ninja.update();
+        cameraOffset = ninja.x - canvas.width / 4;
 
-          platforms.forEach((platform) => {
-            // Check if ninja is above or on the platform
-            if (
-              ninja.y + ninja.height > platform.y &&
-              ninja.y < platform.y + platform.height &&
-              ninja.x + ninja.width > platform.x &&
-              ninja.x < platform.x + platform.width
-            ) {
-              ninja.y = platform.y - ninja.height;
-              ninja.vy = 0;
-              ninja.isJumping = false;
+        let isUnderPlatform = false;
 
-              if (platform.hasSpikes) {
-                endGame(); // End game if spikes are hit
-              }
+        platforms.forEach(platform => {
+          // Check if ninja is above or on the platform
+          if (ninja.y + ninja.height > platform.y && ninja.y < platform.y + platform.height &&
+            ninja.x + ninja.width > platform.x && ninja.x < platform.x + platform.width) {
+            ninja.y = platform.y - ninja.height;
+            ninja.vy = 0;
+            ninja.isJumping = false;
 
-              isUnderPlatform = false; // If ninja is on a platform, they're not under it
-            } else if (ninja.y > platform.y) {
-              isUnderPlatform = true; // Ninja is below the platform
-            }
-          });
-
-          // Update time spent under platforms
-          if (isUnderPlatform) {
-            if (!underPlatformStartTime) {
-              underPlatformStartTime = performance.now();
-            } else {
-              timeUnderPlatforms = performance.now() - underPlatformStartTime;
+            if (platform.hasSpikes) {
+              endGame(); // End game if spikes are hit
             }
 
-            // Trigger game over if ninja is under the platform for too long
-            if (timeUnderPlatforms > maxUnderPlatformTime) {
-              endGame(); // Game over
-              console.log(
-                'Game Over: Ninja stayed under the platform for too long.'
-              );
-            }
+            isUnderPlatform = false; // If ninja is on a platform, they're not under it
+          } else if (ninja.y > platform.y) {
+            isUnderPlatform = true; // Ninja is below the platform
+          }
+        });
+
+        // Update time spent under platforms
+        if (isUnderPlatform) {
+          if (!underPlatformStartTime) {
+            underPlatformStartTime = performance.now();
           } else {
-            // Reset timer if ninja is not under platforms
-            underPlatformStartTime = null;
-            timeUnderPlatforms = 0;
+            timeUnderPlatforms = performance.now() - underPlatformStartTime;
           }
 
-          // Win condition: If ninja crosses the finish flag horizontally
-          if (
-            ninja.x + ninja.width > finishFlag.x &&
-            ninja.x < finishFlag.x + finishFlag.width
-          ) {
-            endGame(true);
+          // Trigger game over if ninja is under the platform for too long
+          if (timeUnderPlatforms > maxUnderPlatformTime) {
+            endGame(); // Game over
           }
-
-          score = Math.floor(ninja.x / 100);
-          updateScore();
-        }
-      }
-
-      function gameLoopFn() {
-        update();
-        draw();
-        gameLoop = requestAnimationFrame(gameLoopFn);
-      }
-
-      function startGame() {
-        gameOver = false; // Reset the gameOver flag
-        startScreen.style.display = 'none';
-        underPlatformStartTime = null;
-        timeUnderPlatforms = 0;
-        init();
-        gameLoop = requestAnimationFrame(gameLoopFn);
-      }
-
-      function endGame(finished = false) {
-        if (finished) {
-          successSound.play(); // Play success sound
         } else {
-          gameOverSound.play(); // Play game over sound
-        }
-        clearInterval(gameLoop);
-        cancelAnimationFrame(gameLoop);
-        gameOver = true; // Set the gameOver flag to true
-        gameOverScreen.style.display = 'flex';
-        finalScoreElement.textContent = score;
-        if (score > highScore) {
-          highScore = score;
-          localStorage.setItem('highScore', highScore);
-        }
-        finalHighScoreElement.textContent = highScore;
-        updateHighScore();
-
-        const gameOverTitle = document.querySelector('#gameOverScreen h1');
-        gameOverTitle.textContent = finished ? 'Congratulations!' : 'Game Over';
-      }
-
-      function updateScore() {
-        scoreElement.textContent = `Score: ${score}`;
-      }
-
-      function updateHighScore() {
-        highScoreElement.textContent = `High Score: ${highScore}`;
-      }
-
-      function setupAudio() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          alert('getUserMedia not supported on this browser.');
-          return;
+          // Reset timer if ninja is not under platforms
+          underPlatformStartTime = null;
+          timeUnderPlatforms = 0;
         }
 
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        navigator.mediaDevices
-          .getUserMedia({ audio: true })
-          .then((stream) => {
-            microphone = audioContext.createMediaStreamSource(stream);
-            analyser = audioContext.createAnalyser();
-            microphone.connect(analyser);
-            analyser.fftSize = 256;
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+        // Win condition: If ninja crosses the finish flag horizontally
+        if (ninja.x + ninja.width > finishFlag.x && ninja.x < finishFlag.x + finishFlag.width) {
+          endGame(true);
+        }
 
-            function analyzeAudio() {
-              analyser.getByteFrequencyData(dataArray);
-              screamVolume = Math.max(...dataArray);
-              requestAnimationFrame(analyzeAudio);
-            }
+        score = Math.floor(ninja.x / 100);
+        updateScore();
+      }
+    }
 
-            analyzeAudio();
-          })
-          .catch((err) => {
-            console.error('Error accessing microphone:', err);
-          });
+    function gameLoopFn() {
+      update();
+      draw();
+      gameLoop = requestAnimationFrame(gameLoopFn);
+    }
+
+    function startGame() {
+      gameOver = false; // Reset the gameOver flag
+      startScreen.style.display = 'none';
+      underPlatformStartTime = null;
+      timeUnderPlatforms = 0;
+      init();
+      gameLoop = requestAnimationFrame(gameLoopFn);
+    }
+
+    function endGame(finished = false) {
+      if (finished) {
+        successSound.play(); // Play success sound
+      } else {
+        gameOverSound.play(); // Play game over sound
+      }
+      clearInterval(gameLoop);
+      cancelAnimationFrame(gameLoop);
+      gameOver = true; // Set the gameOver flag to true
+      gameOverScreen.style.display = 'flex';
+      finalScoreElement.textContent = score;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('highScore', highScore);
+      }
+      finalHighScoreElement.textContent = highScore;
+      updateHighScore();
+
+      const gameOverTitle = document.querySelector('#gameOverScreen h1');
+      gameOverTitle.textContent = finished ? 'Congratulations!' : 'Game Over';
+    }
+
+    function updateScore() {
+      scoreElement.textContent = `Score: ${score}`;
+    }
+
+    function updateHighScore() {
+      highScoreElement.textContent = `High Score: ${highScore}`;
+    }
+
+    function setupAudio() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('getUserMedia not supported on this browser.');
+        return;
       }
 
-      startButton.addEventListener('click', () => {
-        setupAudio();
-        startGame();
-      });
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          microphone = audioContext.createMediaStreamSource(stream);
+          analyser = audioContext.createAnalyser();
+          microphone.connect(analyser);
+          analyser.fftSize = 256;
+          const bufferLength = analyser.frequencyBinCount;
+          const dataArray = new Uint8Array(bufferLength);
 
-      restartButton.addEventListener('click', () => {
-        gameOverScreen.style.display = 'none';
-        startGame();
-      });
+          function analyzeAudio() {
+            analyser.getByteFrequencyData(dataArray);
+            screamVolume = Math.max(...dataArray);
+            requestAnimationFrame(analyzeAudio);
+          }
 
-      sensitivitySlider.addEventListener('input', (event) => {
-        sensitivity = parseInt(event.target.value);
-      });
+          analyzeAudio();
+        })
+        .catch(err => {
+          console.error('Error accessing microphone:', err);
+        });
+    }
 
-      howToPlayButton.addEventListener('click', () => {
-        modal.style.display = 'block';
-      });
+    startButton.addEventListener('click', () => {
+      setupAudio();
+      startGame();
+    });
 
-      closeModal.addEventListener('click', () => {
+    restartButton.addEventListener('click', () => {
+      gameOverScreen.style.display = 'none';
+      startGame();
+    });
+
+    sensitivitySlider.addEventListener('input', (event) => {
+      sensitivity = parseInt(event.target.value);
+    });
+
+    howToPlayButton.addEventListener('click', () => {
+      modal.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target == modal) {
         modal.style.display = 'none';
-      });
+      }
+    });
 
-      window.addEventListener('click', (event) => {
-        if (event.target == modal) {
-          modal.style.display = 'none';
-        }
-      });
+    window.addEventListener('resize', () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    });
+  </script>
+</body>
 
-      window.addEventListener('resize', () => {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-      });
-    </script>
-  </body>
 </html>
